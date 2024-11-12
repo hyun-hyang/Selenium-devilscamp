@@ -27,10 +27,10 @@ url = "https://everytime.kr/" + str(targetBoard)
 
 options = webdriver.FirefoxOptions()
 
-options.add_argument("-headless")
-options.add_argument('--headless')
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
+# options.add_argument("-headless")
+# options.add_argument('--headless')
+# options.add_argument('--no-sandbox')
+# options.add_argument('--disable-dev-shm-usage')
 
 count = 1
 driver = webdriver.Firefox(options=options)
