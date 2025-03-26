@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  sixpc-reservation-bot:
+    container_name: sixpc-reservation-bot
+    build: .
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs

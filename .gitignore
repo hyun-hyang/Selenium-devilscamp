@@ -1,1 +1,2 @@
-.env
+sixpc_reservation/.env
+sixpc_reservation/logs/log_*.txt

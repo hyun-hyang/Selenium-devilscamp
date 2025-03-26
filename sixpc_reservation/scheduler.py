@@ -4,8 +4,15 @@ from datetime import datetime
 import sixpc_reservation
 import requests
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # 디스코드 웹훅 URL
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1354303661274173532/VHPVR-1PGceIABwWCUfGkVDhvBG-0u8lVhfHoNCSm2nkLnBYFb41GgSaNRSM9w-P1T2v"
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+if not DISCORD_WEBHOOK_URL:
+    print("⚠️ DISCORD_WEBHOOK_URL이 .env에 설정되어 있지 않습니다.")
 
 def write_log(message):
     date_str = datetime.now().strftime("%Y-%m-%d")
@@ -13,6 +20,22 @@ def write_log(message):
     with open(log_filename, "a", encoding="utf-8") as f:
         now = datetime.now().strftime("[%Y-%m-%d %H:%M:%S] ")
         f.write(now + message + "\n")
+
+import glob
+import os
+from datetime import datetime, timedelta
+
+def clean_old_logs(days=30):
+    cutoff = datetime.now() - timedelta(days=days)
+    for filename in glob.glob("log_*.txt"):
+        date_str = filename.replace("log_", "").replace(".txt", "")
+        try:
+            file_date = datetime.strptime(date_str, "%Y-%m-%d")
+            if file_date < cutoff:
+                os.remove(filename)
+                print(f"🧹 오래된 로그 삭제: {filename}")
+        except:
+            continue
 
 def send_discord(message, start_time=None, end_time=None):
     today = datetime.now().strftime("%Y-%m-%d (%a)")  # 예: 2025-03-24 (Mon)
@@ -50,15 +73,23 @@ def reserve_study_room():
     send_discord("📌 [스터디실 예약] 예약 시도 중...", start_time, end_time)
 
     try:
+        clean_old_logs()
         sixpc_reservation.main()
         write_log("예약 스크립트 정상 완료")
         send_discord("✅ [스터디실 예약] 예약 완료되었습니다!", start_time, end_time)
         print("예약 완료")
     except Exception as e:
-        error_msg = f"예약 중 오류 발생: {e}"
+        import traceback
+        tb = traceback.format_exc()
+        error_msg = f"예약 중 오류 발생:\n{tb}"
         write_log(error_msg)
-        send_discord(f"❌ [스터디실 예약] 예약 실패!\n오류: {e}", start_time, end_time)
-        print(error_msg)
+        send_discord(f"❌ [스터디실 예약] 예약 실패!\n```\n{tb}\n```", start_time, end_time)
+
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
+date_str = datetime.now().strftime("%Y-%m-%d")
+log_filename = f"logs/log_{date_str}.txt"
 
 # 예약 시간 설정
 schedule.every().monday.at("09:02").do(reserve_study_room)

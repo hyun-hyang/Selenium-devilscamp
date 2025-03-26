@@ -49,7 +49,11 @@ def main():
     driver.find_element(By.ID, 'txtPwd').send_keys(userPw)
     driver.find_element(By.ID, 'txtPwd').send_keys(Keys.ENTER)
     time.sleep(3)
-    pyautogui.press('enter')
+    try:
+        alert = driver.switch_to.alert
+        alert.accept()
+    except:
+        pass  # 팝업이 없으면 무시
     time.sleep(5)
 
     # 강의실 선택
@@ -66,7 +70,11 @@ def main():
     # 예약 버튼 클릭
     driver.find_element(By.XPATH, "//button[text()='예약하기']").click()
     time.sleep(3)
-    pyautogui.press('enter')
+    try:
+        alert = driver.switch_to.alert
+        alert.accept()
+    except:
+        pass  # 팝업이 없으면 무시
     time.sleep(2)
 
     print("예약 완료!")
